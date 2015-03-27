@@ -49,7 +49,7 @@ function usage() {
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 ACTION=											'action' 			a				'ring es kibana'
-ID=												'target'			a 				'get get-doc get-id ui install uninstall purge info register register-all register-index register-viz register-dash register-search register-index delete-viz delete-dash run delete-index delete-search save-all save-viz save-dash save-search save-index'
+ID=												'target'			a 				'delete get get-doc get-id ui install uninstall purge info register register-all register-index register-viz register-dash register-search register-index delete-viz delete-dash run delete-index delete-search save-all save-viz save-dash save-search save-index'
 "
 OPTIONS="
 FORCE=''							      'f'		  ''					b			0		'1'					  Force.
