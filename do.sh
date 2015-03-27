@@ -224,7 +224,7 @@ export FORCE=$FORCE
 # PATH
 JSON_ROOT=$STELLA_APP_ROOT/pool/json
 
-$STELLA_API feature_info elasticsearch#1_4_4
+$STELLA_API feature_info elasticsearch#1_5_0
 export ES_HOME=$FEAT_INSTALL_ROOT
 $STELLA_API feature_info kibana#4_0_1
 export KIBANA_HOME=$FEAT_INSTALL_ROOT
@@ -285,8 +285,6 @@ case $ACTION in
                 echo "** install all features"
                 $STELLA_API get_features
 
-                $STELLA_API feature_info elasticsearch#1_4_4
-                export ES_HOME=$FEAT_INSTALL_ROOT
                 cd $STELLA_APP_WORK_ROOT
 
                 echo "** install plugin river jdbc"
