@@ -58,8 +58,8 @@ INDEX=''                             'i'         'index'                s       
 DOCTYPE=''                             't'         'type'                s           0       ''                      Document type.
 RESOURCE=''                             'r'         'uri'                s           0       ''                      elasticsearch resource.
 MAXSIZE=''                              's'         'integer'           s           0       ''                      Max number of result.
-ESURL='http://localhost:9200'        's'         'http://host:port'           s           0       ''              elasticsearch endpoint
-KURL='http://localhost:5601'        's'         'http://host:port'           s           0       ''              kibana endpoint
+ESURL='http://localhost:9200'        'e'         'http://host:port'           s           0       ''              elasticsearch endpoint
+KURL='http://localhost:5601'        'k'         'http://host:port'           s           0       ''              kibana endpoint
 "
 
 $STELLA_API argparse "$0" "$OPTIONS" "$PARAMETERS" "Ring SEL" "$(usage)" "" "$@"
