@@ -4,18 +4,18 @@ _CURRENT_RUNNING_DIR="$( cd "$( dirname "." )" && pwd )"
 source $_CURRENT_FILE_DIR/stella-link.sh include
 
 # TODO
-# snapshot/restore : http://www.elastic.co/guide/en/elasticsearch/guide/current/backing-up-your-cluster.html
-
+# specific plugin shield : https://www.elastic.co/downloads/shield
+# add some specific plugin 
 function usage() {
     echo "USAGE :"
     echo "----------------"
     echo "List of commands"
     echo " o-- product management :"
-    echo " L     ring <install|uninstall> : install/uninstall everything"
+    echo " L     ring <install|uninstall> : install/uninstall es and kibana"
     echo " L     ring register : register every data, visualization, etc.."
     echo " L     ring purge : delete every data, visualization, etc.."
-    echo " L     ring info : print some informations"
-    echo " L     ring ui : open all web application"
+    echo " L     ring info : print some information"
+    echo " L     ring ui : open some web application"
     echo " o-- es management :"
     echo " L     es run : run elasticsearch"
     echo " L     es purge : erase everything in es"
@@ -29,6 +29,11 @@ function usage() {
     echo " L     es snapshot|restore --index=<index> [--repo=<path>] : snapshot/restore an index into/from a repo location"
     echo " L     es snap-status : snapshot/restore status"
     echo " L     es snap-list : list snapshot"
+    echo " L     es plugin-push --plugin=<id>: install plugin - id = <org>/<user/component>/<version>"
+    echo " L     es plugin-del --plugin=<name>: remove plugin - name = component"
+    echo " o-- specific es plugin management :"
+    echo " L     marvel|hq|head|kopf install : install a specific plugin"
+    echo " L     marvel off : disable data collection for marvel"
     echo " o-- kibana management :"
     echo " L     kibana run : run kibana"
     echo " L     kibana register-all : register all kibana data"
@@ -52,8 +57,8 @@ function usage() {
 
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
-ACTION=											'action' 			a				'ring es kibana'
-ID=												'target'			a 				'snapshot restore snap-status snap-list open-index close-index delete get get-doc get-id ui install uninstall purge info register register-all register-index register-viz register-dash register-search register-index delete-viz delete-dash run delete-index delete-search save-all save-viz save-dash save-search save-index'
+ACTION=											'action' 			a				'ring es kibana marvel hq head kopf'
+ID=												'target'			a 				'off plugin-push plugin-del snapshot restore snap-status snap-list open-index close-index delete get get-doc get-id ui install uninstall purge info register register-all register-index register-viz register-dash register-search register-index delete-viz delete-dash run delete-index delete-search save-all save-viz save-dash save-search save-index'
 "
 OPTIONS="
 FORCE=''							      'f'		  ''					b			0		'1'					  Force.
@@ -65,6 +70,8 @@ MAXSIZE=''                              's'         'integer'           s       
 ESURL='http://localhost:9200'        'e'         'http://host:port'           s           0       ''              elasticsearch endpoint
 KURL='http://localhost:5601'        'k'         'http://host:port'           s           0       ''              kibana endpoint
 REPO=''                             ''         'repository'                s           0       ''                      Snapshot repository
+PLUGIN=''                             'p'         ''                s           0       ''                      Plugin ID or name.
+URI=''                             ''         ''                s           0       ''                      Plugin URI. htto://foo/bar.zip or file:///foo/bar.zip In this case, use --plugin option as name (not id)
 "
 
 $STELLA_API argparse "$0" "$OPTIONS" "$PARAMETERS" "Ring SEL" "$(usage)" "" "$@"
@@ -382,8 +389,8 @@ case $ACTION in
             ;;
 
             install)
-                echo "** get all requirement"
-                $STELLA_API get_all_data
+                #echo "** get all requirement"
+                #$STELLA_API get_all_data
 
                 echo "** install all features"
                 $STELLA_API get_features
@@ -391,61 +398,90 @@ case $ACTION in
                 cd $STELLA_APP_WORK_ROOT
 
                 # Need to initialize ES_HOME for the first time before registring plugin
-                $STELLA_API feature_inspect elasticsearch
-                [ "$TEST_FEATURE" == "1" ] && export ES_HOME=$FEAT_INSTALL_ROOT
-
-                echo "** install plugin river jdbc"
-                $ES_HOME/bin/plugin --remove jdbc 
-                $ES_HOME/bin/plugin --install jdbc --url file:///$STELLA_APP_WORK_ROOT/es_plugin/river_jdbc/elasticsearch-river-jdbc-1.4.0.10.zip
-
-                echo "** install plugin marvel"
-                $ES_HOME/bin/plugin --remove marvel 
-                $ES_HOME/bin/plugin --install marvel --url file:///$STELLA_APP_WORK_ROOT/es_plugin/marvel/marvel-1.3.0.zip
-
-                echo "** install plugin bigdesk"
-                $ES_HOME/bin/plugin --remove bigdesk
-                $ES_HOME/bin/plugin --install bigdesk --url file:///$STELLA_APP_WORK_ROOT/es_plugin/bigdesk/bigdesk-2.5.0.zip
-
-                echo "** install plugin kopf"
-                $ES_HOME/bin/plugin --remove kopf
-                $ES_HOME/bin/plugin --install kopf --url file:///$STELLA_APP_WORK_ROOT/es_plugin/kopf/elasticsearch-kopf-1.4.6.zip
-
-                echo "** install plugin head"
-                $ES_HOME/bin/plugin --remove head
-                $ES_HOME/bin/plugin --install head --url file:///$STELLA_APP_WORK_ROOT/es_plugin/head/elasticsearch-head-master.zip
-
-                echo "** install plugin HQ"
-                $ES_HOME/bin/plugin --remove hq
-                $ES_HOME/bin/plugin --install hq --url file:///$STELLA_APP_WORK_ROOT/es_plugin/hq/elasticsearch-HQ-master.zip
-
-
-                if [ "" == "$(cat $ES_HOME/config/elasticsearch.yml | grep 'marvel.agent.enabled')" ]; then
-                    echo 'marvel.agent.enabled: true' >> $ES_HOME/config/elasticsearch.yml
-                fi
-                # marvel : disable data collection 
-                sed -i.bak 's/^\(marvel\.agent\.enabled:\).*/\1 false/' $ES_HOME/config/elasticsearch.yml 
+                # $STELLA_API feature_inspect elasticsearch
+                # [ "$TEST_FEATURE" == "1" ] && export ES_HOME=$FEAT_INSTALL_ROOT
 
                 # for kibana 3.1.2
-                if [ "" == "$(cat $ES_HOME/config/elasticsearch.yml | grep 'http.cors.enabled')" ]; then
-                    echo 'http.cors.enabled: true' >> $ES_HOME/config/elasticsearch.yml
-                    echo 'http.cors.allow-origin: http://localhost:8888' >> $ES_HOME/config/elasticsearch.yml
-                else
-                    sed -i.bak 's/^\(http\.cors\.enabled:\).*/\1 true/' $ES_HOME/config/elasticsearch.yml
-                    sed -i.bak 's/^\(http\.cors\.allow-origin:\).*/\1 http:\/\/localhost:8888/' $ES_HOME/config/elasticsearch.yml 
-                fi
+                # if [ "" == "$(cat $ES_HOME/config/elasticsearch.yml | grep 'http.cors.enabled')" ]; then
+                #     echo 'http.cors.enabled: true' >> $ES_HOME/config/elasticsearch.yml
+                #     echo 'http.cors.allow-origin: http://localhost:8888' >> $ES_HOME/config/elasticsearch.yml
+                # else
+                #     sed -i.bak 's/^\(http\.cors\.enabled:\).*/\1 true/' $ES_HOME/config/elasticsearch.yml
+                #     sed -i.bak 's/^\(http\.cors\.allow-origin:\).*/\1 http:\/\/localhost:8888/' $ES_HOME/config/elasticsearch.yml 
+                # fi
 
-                echo "** install mysql connector java"
-                cp -f $STELLA_APP_WORK_ROOT/mysql-connector-java-5/*.jar $ES_HOME/plugins/jdbc/               
+                # echo "** install mysql connector java"
+                # cp -f $STELLA_APP_WORK_ROOT/mysql-connector-java-5/*.jar $ES_HOME/plugins/jdbc/               
                 
             ;;
         esac
     ;;
    
 
+    marvel)
+        case $ID in
+            install)
+                $ES_HOME/bin/plugin --install elasticsearch/marvel/latest
+                if [ "" == "$(cat $ES_HOME/config/elasticsearch.yml | grep 'marvel.agent.enabled')" ]; then
+                    echo 'marvel.agent.enabled: true' >> $ES_HOME/config/elasticsearch.yml
+                fi
+                echo " ** GO TO ===> http://$ES_URL/_plugin/marvel"
+                echo " ** for SenseUI ===> http://$ES_URL/_plugin/marvel/sense/index.html"
+            ;;
 
+            off)
+                 # marvel : disable data collection 
+                sed -i.bak 's/^\(marvel\.agent\.enabled:\).*/\1 false/' $ES_HOME/config/elasticsearch.yml 
+            ;;
+         esac
+    ;;
+
+    kopf)
+        case $ID in
+            install)
+                kopf_url=$(curl -sL https://api.github.com/repos/lmenezes/elasticsearch-kopf/releases | jq -r '.[0] | .zipball_url')
+                $ES_HOME/bin/plugin --install kopf --url $kopf_url
+                echo " ** GO TO ===> http://$ES_URL/_plugin/kopf"
+            ;;
+        esac
+    ;;
+
+    head)
+        case $ID in
+            install)
+                $ES_HOME/bin/plugin --install mobz/elasticsearch-head
+                echo " ** GO TO ===> http://$ES_URL/_plugin/head"
+            ;;
+        esac
+    ;;
+
+    hq)
+        case $ID in
+            install)
+                $ES_HOME/bin/plugin --install royrusso/elasticsearch-HQ
+                echo " ** GO TO ===> http://$ES_URL/_plugin/HQ"
+            ;;
+        esac
+    ;;
+    
 
     es)
         case $ID in
+             plugin-push)    
+                if [ "$URI" == "" ]; then
+                    # Note : --plugin must be an id (<org>/<user/component>/<version>)
+                    $ES_HOME/bin/plugin --install "$PLUGIN"
+                else
+                    # Note : --plugin must be a plugin name (component)
+                    $ES_HOME/bin/plugin --install "$PLUGIN" --url "$URI"
+                fi
+            ;;
+
+            plugin-del)
+                $ES_HOME/bin/plugin --remove "$PLUGIN"
+            ;;
+
+           
             run)
                 elasticsearch
             ;;
