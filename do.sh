@@ -23,8 +23,12 @@ function usage() {
     echo " L     es delete --resource=<uri> : delete a ressource"
     echo " L     es register-index --index=<index> : create an index"
     echo " L     es delete-index --index=<index> : delete an index"
+    echo " L     es open-index|close-index --index=<index> : open/close an index"
     echo " L     es get-doc --index=<index> --type=<doctype> [--maxsize=<integer>] : print a list of documents"
     echo " L     es get-id --index=<index> --doctype=<doctype> [--maxsize=<integer>] : print a list of documents id"
+    echo " L     es snapshot|restore --index=<index> : snapshot/restore an index"
+    echo " L     es snap-status : snapshot/restore status"
+    echo " L     es snap-list : list snapshot"
     echo " o-- kibana management :"
     echo " L     kibana run : run kibana"
     echo " L     kibana register-all : register all kibana data"
@@ -49,7 +53,7 @@ function usage() {
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 ACTION=											'action' 			a				'ring es kibana'
-ID=												'target'			a 				'delete get get-doc get-id ui install uninstall purge info register register-all register-index register-viz register-dash register-search register-index delete-viz delete-dash run delete-index delete-search save-all save-viz save-dash save-search save-index'
+ID=												'target'			a 				'snapshot restore snap-status snap-list open-index close-index delete get get-doc get-id ui install uninstall purge info register register-all register-index register-viz register-dash register-search register-index delete-viz delete-dash run delete-index delete-search save-all save-viz save-dash save-search save-index'
 "
 OPTIONS="
 FORCE=''							      'f'		  ''					b			0		'1'					  Force.
@@ -60,6 +64,7 @@ RESOURCE=''                             'r'         'uri'                s      
 MAXSIZE=''                              's'         'integer'           s           0       ''                      Max number of result.
 ESURL='http://localhost:9200'        'e'         'http://host:port'           s           0       ''              elasticsearch endpoint
 KURL='http://localhost:5601'        'k'         'http://host:port'           s           0       ''              kibana endpoint
+REPO=''                             ''         'repository'                s           0       ''                      Snapshot repository
 "
 
 $STELLA_API argparse "$0" "$OPTIONS" "$PARAMETERS" "Ring SEL" "$(usage)" "" "$@"
@@ -126,6 +131,20 @@ function ES_put() {
 
     [ "$_json_file" == "" ] && result=$(curl -s -XPUT $ES_URL/$_target)
     [ ! "$_json_file" == "" ] && result=$(curl -s -XPUT $ES_URL/$_target -d "$(_eval_json_file $_json_file)")
+    echo $result
+
+}
+
+
+function ES_post() {
+    local _target=$1
+    local _json_file=$2
+
+    local result=
+    [ "$DEBUG" == "1" ] && echo $(_eval_json_file $_json_file)
+
+    [ "$_json_file" == "" ] && result=$(curl -s -XPOST $ES_URL/$_target)
+    [ ! "$_json_file" == "" ] && result=$(curl -s -XPOST $ES_URL/$_target -d "$(_eval_json_file $_json_file)")
     echo $result
 
 }
@@ -213,6 +232,87 @@ function ES_load_all_doc_by_type() {
         _id=$(echo $f | sed "s/.json//g")
         [ -f "$f" ] && echo $(ES_put "/$_index/$_type/$_id" "$_path/$_index/$_type/$f")
     done
+}
+
+function ES_close_index() {
+    local _index=$1
+    echo $(ES_post $_index/_close)
+}
+
+function ES_open_index() {
+    local _index=$1
+    echo $(ES_post $_index/_open)
+}
+
+function ES_close_all_index() {
+    echo $(ES_close_index _all)
+}
+
+function ES_open_all_index() {
+    echo $(ES_open_index _all)
+}
+
+
+function ES_create_repo() {
+    local _repo_name=$1
+    REPO_PATH=$2
+
+    echo $(ES_put "_snapshot/$_repo_name" "es_create_repo.json")
+}
+
+function ES_create_snapshot() {
+    local _repo_name=$1
+    local _snapshot_name=$2
+
+    echo $(ES_put "_snapshot/$_repo_name/$_snapshot_name?wait_for_completion=true")
+}
+
+function ES_list_snapshot() {
+    echo $(ES_get "_snapshot/_all")
+}
+
+function ES_delete_snapshot() {
+    local _repo_name=$1
+    local _snapshot_name=$2
+    echo $(ES_del "_snapshot/$_repo_name/$_snapshot_name")
+}
+
+function ES_restore_snapshot() {
+    local _repo_name=$1
+    local _snapshot_name=$2
+    echo $(ES_post "_snapshot/$_repo_name/$_snapshot_name/_restore")
+}
+
+function ES_status_snapshot() {
+    echo $(ES_get "_snapshot/_status")
+}
+
+
+function ES_backup_index() {
+    local _index=$1
+
+    local _repo_name=repo_$_index
+    local _snapshot_name=snapshot_$_index
+
+    ES_close_index $_index
+
+    ES_create_repo $_repo_name $STELLA_APP_WORK_ROOT/$_repo_name
+    ES_create_snapshot $_repo_name $_snapshot_name
+
+    ES_open_index $_index
+
+}
+
+function ES_restore_index() {
+    local _index=$1
+
+    local _repo_name=repo_$_index
+    local _snapshot_name=snapshot_$_index
+
+    ES_close_index "$_index"
+
+    ES_restore_snapshot "$_repo_name" "$_snapshot_name"
+
 
 }
 
@@ -370,6 +470,22 @@ case $ACTION in
             get-id)
                 echo $(ES_get_id_by_type "$INDEX" "$DOCTYPE" "$MAXSIZE") | jq '.'
             ;;
+
+            snapshot)
+                echo $(ES_backup_index "$INDEX")
+                ;;
+
+            restore)
+                echo $(ES_restore_index "$INDEX")
+                ;;
+
+            snap-list)
+                 echo $(ES_list_snapshot)
+                ;;
+
+            snap-status)
+                echo $(ES_status_snapshot)
+                ;;
         esac
     ;;
 
