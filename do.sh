@@ -224,10 +224,10 @@ export FORCE=$FORCE
 # PATH
 JSON_ROOT=$STELLA_APP_ROOT/pool/json
 
-$STELLA_API feature_info elasticsearch#1_5_0
-export ES_HOME=$FEAT_INSTALL_ROOT
-$STELLA_API feature_info kibana#4_0_1
-export KIBANA_HOME=$FEAT_INSTALL_ROOT
+$STELLA_API feature_inspect elasticsearch
+[ "$TEST_FEATURE" == "1" ] && export ES_HOME=$FEAT_INSTALL_ROOT
+$STELLA_API feature_inspect kibana
+[ "$TEST_FEATURE" == "1" ] && export KIBANA_HOME=$FEAT_INSTALL_ROOT
 
 
 
