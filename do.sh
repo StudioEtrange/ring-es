@@ -26,7 +26,7 @@ function usage() {
     echo " L     es open-index|close-index --index=<index> : open/close an index"
     echo " L     es get-doc --index=<index> --type=<doctype> [--maxsize=<integer>] : print a list of documents"
     echo " L     es get-id --index=<index> --doctype=<doctype> [--maxsize=<integer>] : print a list of documents id"
-    echo " L     es snapshot|restore --index=<index> : snapshot/restore an index"
+    echo " L     es snapshot|restore --index=<index> [--repo=<path>] : snapshot/restore an index into/from a repo location"
     echo " L     es snap-status : snapshot/restore status"
     echo " L     es snap-list : list snapshot"
     echo " o-- kibana management :"
@@ -263,8 +263,11 @@ function ES_create_repo() {
 function ES_create_snapshot() {
     local _repo_name=$1
     local _snapshot_name=$2
+    local _index=$3
 
-    echo $(ES_put "_snapshot/$_repo_name/$_snapshot_name?wait_for_completion=true")
+    INDEX_LIST=$_index
+
+    echo $(ES_put "_snapshot/$_repo_name/$_snapshot_name" "ES_create_snapshot.json")
 }
 
 function ES_list_snapshot() {
@@ -288,26 +291,26 @@ function ES_status_snapshot() {
 }
 
 
-function ES_backup_index() {
+function ES_snapshot_index() {
     local _index=$1
+    local _repo_path=$2
 
     local _repo_name=repo_$_index
+    [ "$_repo_path" == "" ] && _repo_path=./repo_$_index
+    
     local _snapshot_name=snapshot_$_index
 
-    ES_close_index $_index
-
-    ES_create_repo $_repo_name $STELLA_APP_WORK_ROOT/$_repo_name
-    ES_create_snapshot $_repo_name $_snapshot_name
-
-    ES_open_index $_index
+    ES_create_repo $_repo_name $_repo_path
+    ES_create_snapshot "$_repo_name" "$_snapshot_name" "$INDEX"
 
 }
 
 function ES_restore_index() {
     local _index=$1
+    local _repo_path=$2
 
     local _repo_name=repo_$_index
-    local _snapshot_name=snapshot_$_index
+    [ "$_repo_path" == "" ] && _repo_path=./repo_$_index
 
     ES_close_index "$_index"
 
@@ -472,11 +475,11 @@ case $ACTION in
             ;;
 
             snapshot)
-                echo $(ES_backup_index "$INDEX")
+                echo $(ES_snapshot_index "$INDEX" "$REPO")
                 ;;
 
             restore)
-                echo $(ES_restore_index "$INDEX")
+                echo $(ES_restore_index "$INDEX" "$REPO")
                 ;;
 
             snap-list)

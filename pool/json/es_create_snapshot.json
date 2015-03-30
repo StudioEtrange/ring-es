@@ -1,0 +1,6 @@
+{
+    "indices": "$INDEX_LIST",
+    "ignore_unavailable": "true",
+    "include_global_state": "false",
+    "wait_for_completion" : "true"
+ }
