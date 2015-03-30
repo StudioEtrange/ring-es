@@ -287,6 +287,10 @@ case $ACTION in
 
                 cd $STELLA_APP_WORK_ROOT
 
+                # Need to initialize ES_HOME for the first time before registring plugin
+                $STELLA_API feature_inspect elasticsearch
+                [ "$TEST_FEATURE" == "1" ] && export ES_HOME=$FEAT_INSTALL_ROOT
+
                 echo "** install plugin river jdbc"
                 $ES_HOME/bin/plugin --remove jdbc 
                 $ES_HOME/bin/plugin --install jdbc --url file:///$STELLA_APP_WORK_ROOT/es_plugin/river_jdbc/elasticsearch-river-jdbc-1.4.0.10.zip
