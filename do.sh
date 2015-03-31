@@ -152,6 +152,7 @@ function ES_post() {
 
     [ "$_json_file" == "" ] && result=$(curl -s -XPOST $ES_URL/$_target)
     [ ! "$_json_file" == "" ] && result=$(curl -s -XPOST $ES_URL/$_target -d "$(_eval_json_file $_json_file)")
+   
     echo $result
 
 }
@@ -316,11 +317,14 @@ function ES_restore_index() {
     local _index=$1
     local _repo_path=$2
 
+    local _snapshot_name=snapshot_$_index
     local _repo_name=repo_$_index
+
     [ "$_repo_path" == "" ] && _repo_path=./repo_$_index
 
     ES_close_index "$_index"
 
+    ES_create_repo $_repo_name $_repo_path
     ES_restore_snapshot "$_repo_name" "$_snapshot_name"
 
 
@@ -425,8 +429,8 @@ case $ACTION in
                 if [ "" == "$(cat $ES_HOME/config/elasticsearch.yml | grep 'marvel.agent.enabled')" ]; then
                     echo 'marvel.agent.enabled: true' >> $ES_HOME/config/elasticsearch.yml
                 fi
-                echo " ** GO TO ===> http://$ES_URL/_plugin/marvel"
-                echo " ** for SenseUI ===> http://$ES_URL/_plugin/marvel/sense/index.html"
+                echo " ** GO TO ===> $ES_URL/_plugin/marvel"
+                echo " ** for SenseUI ===> $ES_URL/_plugin/marvel/sense/index.html"
             ;;
 
             off)
@@ -441,7 +445,7 @@ case $ACTION in
             install)
                 kopf_url=$(curl -sL https://api.github.com/repos/lmenezes/elasticsearch-kopf/releases | jq -r '.[0] | .zipball_url')
                 $ES_HOME/bin/plugin --install kopf --url $kopf_url
-                echo " ** GO TO ===> http://$ES_URL/_plugin/kopf"
+                echo " ** GO TO ===> $ES_URL/_plugin/kopf"
             ;;
         esac
     ;;
@@ -450,7 +454,7 @@ case $ACTION in
         case $ID in
             install)
                 $ES_HOME/bin/plugin --install mobz/elasticsearch-head
-                echo " ** GO TO ===> http://$ES_URL/_plugin/head"
+                echo " ** GO TO ===> $ES_URL/_plugin/head"
             ;;
         esac
     ;;
@@ -459,7 +463,7 @@ case $ACTION in
         case $ID in
             install)
                 $ES_HOME/bin/plugin --install royrusso/elasticsearch-HQ
-                echo " ** GO TO ===> http://$ES_URL/_plugin/HQ"
+                echo " ** GO TO ===> $ES_URL/_plugin/HQ"
             ;;
         esac
     ;;
