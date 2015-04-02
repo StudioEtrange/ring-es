@@ -1,4 +1,5 @@
 #!/bin/bash
+STELLA_SILENT=1
 _CURRENT_FILE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 _CURRENT_RUNNING_DIR="$( cd "$( dirname "." )" && pwd )"
 source $_CURRENT_FILE_DIR/stella-link.sh include
