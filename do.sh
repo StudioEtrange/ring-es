@@ -1,5 +1,4 @@
 #!/bin/bash
-STELLA_SILENT=1
 _CURRENT_FILE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 _CURRENT_RUNNING_DIR="$( cd "$( dirname "." )" && pwd )"
 source $_CURRENT_FILE_DIR/stella-link.sh include
@@ -460,11 +459,10 @@ case $DOMAIN in
             home)
                 case $ID in
                     es)
-                        echo export ES_HOME=$ES_HOME
-                        export ES_HOME=$ES_HOME
+                        echo $ES_HOME
                     ;;
                     kibana)
-                        export KIBANA_HOME=$KIBANA_HOME
+                        echo $KIBANA_HOME
                     ;;
                 esac
             ;;
