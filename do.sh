@@ -459,6 +459,7 @@ case $DOMAIN in
             home)
                 case $ID in
                     es)
+                        echo export ES_HOME=$ES_HOME
                         export ES_HOME=$ES_HOME
                     ;;
                     kibana)
