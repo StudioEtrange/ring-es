@@ -18,6 +18,8 @@ function usage() {
     echo " L     ring purge all : delete every data, visualization, etc.."
     echo " L     ring show info : print some information"
     echo " L     ring show ui : open some web applications"
+    echo " L     ring home es : return es home path"
+    echo " L     ring home kibana : return es home path"
     echo " o-- ES management :"
     echo " L     es run <single|daemon> : run elasticsearch"
     echo " L     es kill now : stop all elasticsearch instances"
@@ -59,7 +61,7 @@ function usage() {
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 DOMAIN=						'' 			a				'kibana plugin bck es ring'
-ACTION=                     ''            a             'stop delete save register purge run install delete specific marvel snapshot restore save get close open create show uninstall'
+ACTION=                     ''            a             'home stop delete save register purge run install delete specific marvel snapshot restore save get close open create show uninstall'
 ID=							''			s 				''
 "
 OPTIONS="
@@ -452,6 +454,17 @@ case $DOMAIN in
             purge)
                 $0 kibana purge all
                 $0 es purge all
+            ;;
+
+            home)
+                case $ID in
+                    es)
+                        echo $ES_HOME
+                    ;;
+                    kibana)
+                        echo $KIBANA_HOME
+                    ;;
+                esac
             ;;
 
             
