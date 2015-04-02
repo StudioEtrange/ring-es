@@ -459,10 +459,10 @@ case $DOMAIN in
             home)
                 case $ID in
                     es)
-                        echo $ES_HOME
+                        export ES_HOME=$ES_HOME
                     ;;
                     kibana)
-                        echo $KIBANA_HOME
+                        export KIBANA_HOME=$KIBANA_HOME
                     ;;
                 esac
             ;;
