@@ -13,8 +13,8 @@ function usage() {
     echo "----------------"
     echo "List of commands"
     echo " o-- GENERIC management :"
-    echo " L     ring <install> <es|kibana|all>: install ES, KIBANA or both"
-    echo " L     ring <uninstall> all : uninstall everything"
+    echo " L     ring install <es|kibana|all>: install ES, KIBANA or both"
+    echo " L     ring uninstall all : uninstall everything"
     echo " L     ring purge all : delete every data, visualization, etc.."
     echo " L     ring show info : print some information"
     echo " L     ring show ui : open some web applications"
@@ -23,13 +23,16 @@ function usage() {
     echo " L     es kill now : stop all elasticsearch instances"
     echo " L     es purge all : erase everything in es"
     echo " L     es create <index> : create an index"
+    echo " L     es delete <index> : delete an index"
     echo " L     es open <index> : open an index"
     echo " L     es close <index> : close an index"
-    echo " L     es delete <uri> : delete a generic resource"
-    echo " o-- ES request :"
+    echo " o-- ES get request :"
     echo " L     es get id --index=<index> --doctype=<doctype> [--maxsize=<integer>] : print a list of id documents"
     echo " L     es get doc --index=<index> --doctype=<doctype> [--maxsize=<integer>] : print a list of documents"
+    echo " o-- ES raw request :"
     echo " L     es get <resource> : get a resource from ES"
+    echo " L     es <put|post> <resource> [--uri] : put or post a generic resource. uri option may be used to pass a json file"
+    echo " L     es delete <resource> : delete a generic resource"
     echo " o-- ES backup management :"
     echo " L     bck save <index> [--repo=<path>] [--snap=<name>] : backup an index into a snapshot inside a repo location"
     echo " L     bck restore <index> [--repo=<path>] [--snap=<name>] : restore an index from a snapshot within a repo location"
@@ -43,8 +46,8 @@ function usage() {
     echo " o-- KIBANA management :"
     echo " L     kibana run <single|daemon> : run kibana"
     echo " L     kibana kill now : stop all kibana instances"
-    echo " L     kibana push all [--folder=<path>] : register all kibana objects [from a specific root folder]"
-    echo " L     kibana push <viz|dash|pattern|search> [--folder=<path>] : register kibana visualization|dashboard|index-pattern|search [from a specific root folder]"
+    echo " L     kibana register all [--folder=<path>] : register all kibana objects [from a specific root folder]"
+    echo " L     kibana register <viz|dash|pattern|search> [--folder=<path>] : register kibana visualization|dashboard|index-pattern|search [from a specific root folder]"
     echo " L     kibana save all [--folder=<path>] : save all kibana obects [into a specific root folder]"
     echo " L     kibana save <viz|dash|pattern|search> [--folder=<path>] : save all kibana visualization|dashboard|index-pattern|search [into a specific root folder]"
     echo " L     kibana delete all : erase all kibana objects"
@@ -56,7 +59,7 @@ function usage() {
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 DOMAIN=						'' 			a				'kibana plugin bck es ring'
-ACTION=                     ''            a             'stop delete save push purge run install delete specific marvel snapshot restore save get close open create show uninstall'
+ACTION=                     ''            a             'stop delete save register purge run install delete specific marvel snapshot restore save get close open create show uninstall'
 ID=							''			s 				''
 "
 OPTIONS="
@@ -481,6 +484,14 @@ case $DOMAIN in
                 echo $(ES_put "$ID")
             ;;
 
+            put)
+                echo $(ES_put "$ID" "$URI")
+            ;;
+
+            post)
+                echo $(ES_post "$ID" "$URI")
+            ;;
+            
             open)
                 ES_open_index $ID
             ;;
@@ -604,14 +615,14 @@ case $DOMAIN in
             kill)
                 kill $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2)
             ;;
-            push)
+            register)
                 case $ID in 
                     all)
                         echo " ** Register kibana objects"
-                        $0 kibana push pattern --folder="$FOLDER"
-                        $0 kibana push search --folder="$FOLDER"
-                        $0 kibana push viz --folder="$FOLDER"
-                        $0 kibana push dash --folder="$FOLDER"
+                        $0 kibana register pattern --folder="$FOLDER"
+                        $0 kibana register search --folder="$FOLDER"
+                        $0 kibana register viz --folder="$FOLDER"
+                        $0 kibana register dash --folder="$FOLDER"
                     ;;
                     
                     viz)
