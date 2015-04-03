@@ -487,6 +487,7 @@ case $DOMAIN in
             ;;
 
             kill)
+                echo " ** elasticsearch PID $(ps aux | grep [o]rg.elasticsearch.bootstrap.Elasticsearch | tr -s " " | cut -d" " -f 2) stopping"
                 kill $(ps aux | grep [o]rg.elasticsearch.bootstrap.Elasticsearch | tr -s " " | cut -d" " -f 2)
             ;;
 
@@ -628,6 +629,7 @@ case $DOMAIN in
                 esac
             ;;
             kill)
+                echo " ** elasticsearch PID $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2) stopping"
                 kill $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2)
             ;;
             register)
