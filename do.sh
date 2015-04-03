@@ -629,7 +629,7 @@ case $DOMAIN in
                 esac
             ;;
             kill)
-                echo " ** elasticsearch PID $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2) stopping"
+                echo " ** kibana PID $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2) stopping"
                 kill $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2)
             ;;
             register)
