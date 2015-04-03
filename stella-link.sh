@@ -6,14 +6,14 @@ _STELLA_LINK_CURRENT_FILE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 if [ "$1" == "include" ]||[ "$1" == "chaining" ]; then
 	if [ ! -f "$STELLA_ROOT/stella.sh" ]; then
 		if [ -f "$(dirname $STELLA_ROOT)/stella-link.sh" ]; then
-			[ "$STELLA_SILENT" == "" ] && echo " ** Try to chain link stella from $(dirname $STELLA_ROOT)"
+			echo " ** Try to chain link stella from $(dirname $STELLA_ROOT)"
 			source $(dirname $STELLA_ROOT)/stella-link.sh chaining
 		else
-			[ "$STELLA_SILENT" == "" ] && echo "** WARNING Stella is missing -- bootstraping stella"
+			echo "** WARNING Stella is missing -- bootstraping stella"
 			$_STELLA_LINK_CURRENT_FILE_DIR/stella-link.sh bootstrap
 		fi
 	else
-		[ "$STELLA_SILENT" == "" ] && echo " ** Stella found : $STELLA_ROOT"
+		echo " ** Stella found : $STELLA_ROOT"
 	fi
 fi
 
