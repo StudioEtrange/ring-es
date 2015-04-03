@@ -480,8 +480,10 @@ case $DOMAIN in
                     ;;
 
                     daemon)
-                        nohup elasticsearch 1>$STELLA_APP_WORK_ROOT/log.es.log 2>&1 &
-                        echo " ** elasticsearch started with PID $(ps aux | grep [o]rg.elasticsearch.bootstrap.Elasticsearch | tr -s " " | cut -d" " -f 2)"
+                        elasticsearch -d -p $STELLA_APP_WORK_ROOT/es.pid
+                        #nohup elasticsearch 1>$STELLA_APP_WORK_ROOT/log.es.log 2>&1 &
+                        #echo " ** elasticsearch started with PID $(ps aux | grep [o]rg.elasticsearch.bootstrap.Elasticsearch | tr -s " " | cut -d" " -f 2)"
+                        echo " ** elasticsearch started with PID $(cat $STELLA_APP_WORK_ROOT/es.pid)"
                     ;;
                 esac
             ;;
@@ -623,7 +625,7 @@ case $DOMAIN in
                     ;;
 
                     daemon)
-                        nohup kibana 1>$STELLA_APP_WORK_ROOT/log.kibana.log 2>&1 &
+                        nohup kibana 1>/dev/null 2>&1 &
                         echo " ** kibana started with PID $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2)"
                     ;;
                 esac
