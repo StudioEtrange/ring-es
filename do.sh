@@ -61,7 +61,7 @@ function usage() {
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 DOMAIN=						'' 			a				'kibana plugin bck es ring'
-ACTION=                     ''            a             'home stop delete save register purge run install delete specific marvel snapshot restore save get close open create show uninstall'
+ACTION=                     ''            a             'home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
 ID=							''			s 				''
 "
 OPTIONS="
@@ -481,6 +481,7 @@ case $DOMAIN in
 
                     daemon)
                         nohup elasticsearch 1>$STELLA_APP_WORK_ROOT/log.es.log 2>&1 &
+                        echo " ** elasticsearch started with PID $(ps aux | grep [o]rg.elasticsearch.bootstrap.Elasticsearch | tr -s " " | cut -d" " -f 2)"
                     ;;
                 esac
             ;;
@@ -622,6 +623,7 @@ case $DOMAIN in
 
                     daemon)
                         nohup kibana 1>$STELLA_APP_WORK_ROOT/log.kibana.log 2>&1 &
+                        echo " ** kibana started with PID $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2)"
                     ;;
                 esac
             ;;
