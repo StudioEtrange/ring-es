@@ -390,7 +390,7 @@ KOPF_UI=$ES_URL/_plugin/kopf
 HEAD_UI=$ES_URL/_plugin/head
 HQ_UI=$ES_URL/_plugin/hq
 
-local _proxy
+_proxy=
 if [ ! "$STELLA_PROXY_ACTIVE" == "" ];then 
     _proxy="-DproxyPort=$STELLA_PROXY_PORT -DproxyHost=$STELLA_PROXY_HOST"
 fi
@@ -541,7 +541,7 @@ case $DOMAIN in
                         echo $(ES_get_doc_list_by_type "$INDEX" "$DOCTYPE" "$MAXSIZE") | jq '.'
                     ;;
                     *)
-                         echo $(ES_get "$ID")
+                         echo $(ES_get "$ID") | jq '.'
                     ;;
                 esac
 
