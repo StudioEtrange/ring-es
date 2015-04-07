@@ -13,7 +13,7 @@ function usage() {
     echo "----------------"
     echo "List of commands"
     echo " o-- GENERIC management :"
-    echo " L     ring install <es|kibana|all>: install ES, KIBANA or both"
+    echo " L     ring install <es|kibana|all> [--esver=<es version>] [--kver=<kibana version>: install ES, KIBANA or both"
     echo " L     ring uninstall all : uninstall everything"
     echo " L     ring purge all : delete every data, visualization, etc.."
     echo " L     ring show info : print some information"
@@ -75,6 +75,8 @@ REPO=''                             'r'         'repository'                s   
 SNAP=''                             's'         'snapshot'                s           0       ''                      Snapshot id
 URI=''                             'u'         ''                s           0       ''                      URI (http:// or file://)
 FOLDER=''                             ''         'path'                s           0       ''                      Root folder
+ESVER='1_5_0'        ''         ''           s           0       ''              elasticsearch version
+KVER='4_0_1'        ''         ''           s           0       ''              elasticsearch version
 "
 
 $STELLA_API argparse "$0" "$OPTIONS" "$PARAMETERS" "Ring Elasticsearch" "$(usage)" "" "$@"
@@ -397,19 +399,22 @@ case $DOMAIN in
                 case $ID in 
                     all)
                         echo "** install all features"
-                        $STELLA_API get_features
+                        $STELLA_API get_feature jq
+
+                        $STELLA_API feature_install elasticsearch#"$ESVER" "HIDDEN"
+                        $STELLA_API feature_install kibana#"$KVER" "HIDDEN"
                     ;;
 
                     es)
                         $STELLA_API get_feature jq
                         echo "** install elasticsearch"
-                        $STELLA_API get_feature elasticsearch
+                        $STELLA_API feature_install elasticsearch#"$ESVER" "HIDDEN"
                     ;;
 
                     kibana)
                         $STELLA_API get_feature jq
                         echo "** install kibana"
-                        $STELLA_API get_feature kibana
+                        $STELLA_API feature_install kibana#"$KVER" "HIDDEN"
 
                     ;;
                 esac
