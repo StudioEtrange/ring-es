@@ -390,6 +390,12 @@ KOPF_UI=$ES_URL/_plugin/kopf
 HEAD_UI=$ES_URL/_plugin/head
 HQ_UI=$ES_URL/_plugin/hq
 
+local _proxy
+if [ ! "$STELLA_PROXY_ACTIVE" == "" ];then 
+    _proxy="-DproxyPort=$STELLA_PROXY_PORT -DproxyHost=$STELLA_PROXY_HOST"
+fi
+
+
 # ----------------------------------- MAIN ------------------------------------------------
 case $DOMAIN in
     # -----------------------------------------------------------------------------------
@@ -487,6 +493,7 @@ case $DOMAIN in
                     daemon)
                         #elasticsearch -d -p $STELLA_APP_WORK_ROOT/es.pid
                         nohup -- elasticsearch 1>$STELLA_APP_WORK_ROOT/log.es.log 2>&1 &
+                        sleep 1
                         echo " ** elasticsearch started with PID $(ps aux | grep [o]rg.elasticsearch.bootstrap.Elasticsearch | tr -s " " | cut -d" " -f 2)"
                         #echo " ** elasticsearch started with PID $(cat $STELLA_APP_WORK_ROOT/es.pid)"
                     ;;
@@ -567,14 +574,16 @@ case $DOMAIN in
     ;;
     # -----------------------------------------------------------------------------------
     plugin)
+ 
         case $ACTION in  
             install)
+
                 if [ "$URI" == "" ]; then
                     # Note : --plugin must be an id (<org>/<user/component>/<version>)
-                    $ES_HOME/bin/plugin --install "$ID"
+                    $ES_HOME/bin/plugin $_proxy --install "$ID"
                 else
                     # Note : --plugin must be a plugin name (component)
-                    $ES_HOME/bin/plugin --install "$ID" --url "$URI"
+                    $ES_HOME/bin/plugin $_proxy --install "$ID" --url "$URI"
                 fi
             ;;
 
@@ -586,21 +595,21 @@ case $DOMAIN in
                 case $ID in 
                     kopf)
                         kopf_url=$(curl -sL https://api.github.com/repos/lmenezes/elasticsearch-kopf/releases | jq -r '.[0] | .zipball_url')
-                        $ES_HOME/bin/plugin --install kopf --url $kopf_url
+                        $ES_HOME/bin/plugin $_proxy --install kopf --url $kopf_url
                         echo " ** GO TO ===> $ES_URL/_plugin/kopf"
                     ;;
 
                     head)
-                        $ES_HOME/bin/plugin --install mobz/elasticsearch-head
+                        $ES_HOME/bin/plugin $_proxy --install mobz/elasticsearch-head
                         echo " ** GO TO ===> $ES_URL/_plugin/head"
                     ;;
 
                     hq)
-                        $ES_HOME/bin/plugin --install royrusso/elasticsearch-HQ
+                        $ES_HOME/bin/plugin $_proxy --install royrusso/elasticsearch-HQ
                         echo " ** GO TO ===> $ES_URL/_plugin/HQ"
                     ;;
                     marvel)
-                        $ES_HOME/bin/plugin --install elasticsearch/marvel/latest
+                        $ES_HOME/bin/plugin $_proxy --install elasticsearch/marvel/latest
                         if [ "" == "$(cat $ES_HOME/config/elasticsearch.yml | grep 'marvel.agent.enabled')" ]; then
                             echo 'marvel.agent.enabled: true' >> $ES_HOME/config/elasticsearch.yml
                         fi
