@@ -120,7 +120,7 @@ function _eval_file_old() {
     eval echo -e $(cat "$_json_file" | sed "s/\\\/\\\\\\\/g" | sed "s/\\\/\\\\\\\/g" | sed "s/\*/\\\\\*/g" | sed "s/\"/\\\\\"/g" | sed "s/{/\\\{/g" | sed "s/}/\\\}/g" | sed "s/(/\\\(/g" | sed "s/)/\\\)/g" | sed "s/\\[/\\\\\\[/g" | sed "s/\\]/\\\\\\]/g" | sed "s/\\</\\\\\\</g" | sed "s/\\>/\\\\\\>/g")
 }
 
-function __eval_file() {
+function _eval_file() {
     declare _file="$1"
     _file=$($STELLA_API rel_to_abs_path "$_file" "$STELLA_CURRENT_RUNNING_DIR")
 
