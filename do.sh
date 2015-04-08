@@ -43,8 +43,9 @@ function usage() {
     echo " o-- ES plugin management :"
     echo " L     plugin install <org/user/component/version> [--uri=<uri>] : install plugin. If uri is used, --plugin must be a plugin <component> name"
     echo " L     plugin delete <component> : remove plugin. <component> is the plugin name"
-    echo " L     plugin specific <marvel|hq|head|kopf> : install a specific plugin"
+    echo " L     plugin specific <marvel|hq|head|kopf|shield> : install a specific plugin"
     echo " L     plugin marvel off : disable data collection for marvel"
+    echo " L     plugin shield <add|del> --user --pass"
     echo " o-- KIBANA management :"
     echo " L     kibana run <single|daemon> : run kibana"
     echo " L     kibana kill now : stop all kibana instances"
@@ -61,7 +62,7 @@ function usage() {
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 DOMAIN=						'' 			a				'kibana plugin bck es ring'
-ACTION=                     ''            a             'home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
+ACTION=                     ''            a             'shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
 ID=							''			s 				''
 "
 OPTIONS="
@@ -77,6 +78,8 @@ URI=''                             'u'         ''                s           0  
 FOLDER=''                             ''         'path'                s           0       ''                      Root folder
 ESVER='1_5_0'        ''         ''           s           0       ''              elasticsearch version
 KVER='4_0_1'        ''         ''           s           0       ''              elasticsearch version
+USER=''        ''         ''           s           0       ''              username
+PASS=''        ''         ''           s           0       ''              password
 "
 
 $STELLA_API argparse "$0" "$OPTIONS" "$PARAMETERS" "Ring Elasticsearch" "$(usage)" "" "$@"
@@ -108,6 +111,8 @@ function info() {
     echo "** HQ UI : $HQ_UI"
     echo ""
 }
+
+
 
 # ------- INTERNAL FUNCTIONS -------------
 # eval a file content (might be used to evaluate variable inside a file)
@@ -614,6 +619,10 @@ case $DOMAIN in
                         echo " ** GO TO ===> $ES_URL/_plugin/marvel"
                         echo " ** for SenseUI ===> $ES_URL/_plugin/marvel/sense/index.html"
                     ;;
+                    shield)
+                        $ES_HOME/bin/plugin $_proxy --install elasticsearch/license/latest
+                        $ES_HOME/bin/plugin $_proxy --install elasticsearch/shield/latest
+                    ;;
                 esac
             ;;
 
@@ -624,7 +633,18 @@ case $DOMAIN in
                         sed -i.bak 's/^\(marvel\.agent\.enabled:\).*/\1 false/' $ES_HOME/config/elasticsearch.yml 
                     ;; 
                 esac
-            ;; 
+            ;;
+
+            shield)
+                case $ID in 
+                    add)
+                        $ES_HOME/bin/shield useradd $USER -p $PASS -r admin
+                    ;;
+                     del)
+                        $ES_HOME/bin/shield userdel $USER
+                    ;;
+                esac
+            ::
         esac
     ;;
     # -----------------------------------------------------------------------------------
@@ -693,6 +713,9 @@ case $DOMAIN in
 
                     pattern)
                         ES_save_all_doc_by_type ".kibana" "index-pattern" "$FOLDER"
+                         # TODO : hack for scripted fields
+                        #sed -i.bak 's/\\\\\\/\\\\\\\\\\/g' $SEL_SAVE_ROOT/.kibana/index-pattern/sel_data.json
+                        #rm $SEL_SAVE_ROOT/.kibana/index-pattern/sel_data.json.bak
                     ;;
 
                     search)
