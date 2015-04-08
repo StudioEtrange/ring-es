@@ -111,20 +111,7 @@ function info() {
 
 # ------- INTERNAL FUNCTIONS -------------
 # eval a file content (might be used to evaluate variable inside a file)
-#   example 1 :  _eval_file file.original file.destination
-#   example 2 :  var=$(_eval_file file.original) && echo "$var"
-function _eval_file() {
-    local _file=$1
-    local _output_file=$2
-
-    if [ "$_output_file" == "" ]; then
-        echo "$(eval echo -e "\"$(cat "$_file" | sed "s/\\\/\\\\\\\/g" | sed "s/\"/\\\\\"/g")\"")"
-    else
-        echo "$(eval echo -e "\"$(cat "$_file" | sed "s/\\\/\\\\\\\/g" | sed "s/\"/\\\\\"/g")\"")" >$_output_file
-    fi
-}
-
-function _eval_json_file() {
+function _eval_file_old() {
     local _json_file=$1
 
     _json_file=$($STELLA_API rel_to_abs_path "$_json_file" "$STELLA_CURRENT_RUNNING_DIR")
@@ -133,6 +120,17 @@ function _eval_json_file() {
     eval echo -e $(cat "$_json_file" | sed "s/\\\/\\\\\\\/g" | sed "s/\\\/\\\\\\\/g" | sed "s/\*/\\\\\*/g" | sed "s/\"/\\\\\"/g" | sed "s/{/\\\{/g" | sed "s/}/\\\}/g" | sed "s/(/\\\(/g" | sed "s/)/\\\)/g" | sed "s/\\[/\\\\\\[/g" | sed "s/\\]/\\\\\\]/g" | sed "s/\\</\\\\\\</g" | sed "s/\\>/\\\\\\>/g")
 }
 
+function __eval_file() {
+    declare _file="$1"
+    _file=$($STELLA_API rel_to_abs_path "$_file" "$STELLA_CURRENT_RUNNING_DIR")
+
+    declare data=$(< "$_file")
+    declare delimiter="__apply_shell_expansion_delimiter__"
+    declare c="cat <<$delimiter"$'\n'"$data"$'\n'"$delimiter"
+    eval "$c"
+}
+
+
 # -------- ES PRIMARY FUNCTIONS ----------------------------------------------------
 
 function ES_put() {
@@ -140,10 +138,10 @@ function ES_put() {
     local _json_file=$2
 
     local result=
-    [ "$DEBUG" == "1" ] && echo $(_eval_json_file $_json_file)
+    [ "$DEBUG" == "1" ] && echo $(_eval_file $_json_file)
 
     [ "$_json_file" == "" ] && result=$(curl -s -XPUT $ES_URL/$_target)
-    [ ! "$_json_file" == "" ] && result=$(curl -s -XPUT $ES_URL/$_target -d "$(_eval_json_file $_json_file)")
+    [ ! "$_json_file" == "" ] && result=$(curl -s -XPUT $ES_URL/$_target -d "$(_eval_file $_json_file)")
     echo $result
 }
 
@@ -153,10 +151,10 @@ function ES_post() {
     local _json_file=$2
 
     local result=
-    [ "$DEBUG" == "1" ] && echo $(_eval_json_file $_json_file)
+    [ "$DEBUG" == "1" ] && echo $(_eval_file $_json_file)
 
     [ "$_json_file" == "" ] && result=$(curl -s -XPOST $ES_URL/$_target)
-    [ ! "$_json_file" == "" ] && result=$(curl -s -XPOST $ES_URL/$_target -d "$(_eval_json_file $_json_file)")
+    [ ! "$_json_file" == "" ] && result=$(curl -s -XPOST $ES_URL/$_target -d "$(_eval_file $_json_file)")
    
     echo $result
 }
@@ -177,7 +175,7 @@ function ES_get() {
      local result=
 
     [ "$_json_file" == "" ] && result=$(curl -s -XGET $ES_URL/$_target)
-    [ ! "$_json_file" == "" ] && result=$(curl -s -XGET $ES_URL/$_target -d "$(_eval_json_file $_json_file)")
+    [ ! "$_json_file" == "" ] && result=$(curl -s -XGET $ES_URL/$_target -d "$(_eval_file $_json_file)")
 
     echo $result
 }
