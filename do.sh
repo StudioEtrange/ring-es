@@ -21,7 +21,7 @@ function usage() {
     echo " L     ring home es : return es home path"
     echo " L     ring home kibana : return es home path"
     echo " o-- ES management :"
-    echo " L     es run <single|daemon> : run elasticsearch"
+    echo " L     es run <single|daemon> [--folder=<path>] : run elasticsearch -- folder path for log, if none log are disabled"
     echo " L     es kill now : stop all elasticsearch instances"
     echo " L     es purge all : erase everything in es"
     echo " L     es create <index> : create an index"
@@ -47,7 +47,7 @@ function usage() {
     echo " L     plugin marvel off : disable data collection for marvel"
     echo " L     plugin shield <add|del> --user --pass"
     echo " o-- KIBANA management :"
-    echo " L     kibana run <single|daemon> : run kibana"
+    echo " L     kibana run <single|daemon> [--folder=<path>] : run kibana -- folder path for log, if none log are disabled"
     echo " L     kibana kill now : stop all kibana instances"
     echo " L     kibana register all [--folder=<path>] : register all kibana objects [from a specific root folder]"
     echo " L     kibana register <viz|dash|pattern|search> [--folder=<path>] : register kibana visualization|dashboard|index-pattern|search [from a specific root folder]"
@@ -428,9 +428,6 @@ case $DOMAIN in
                     ;;
                 esac
                 
-                #echo "** get all requirement"
-                #$STELLA_API get_all_data
-
                 cd $STELLA_APP_WORK_ROOT
 
                 # for kibana 3.1.2
@@ -490,12 +487,19 @@ case $DOMAIN in
             run)
                 case $ID in 
                     single)
-                        elasticsearch
+                        if [ "$FOLDER" == "" ]; then
+                            elasticsearch
+                        else
+                            elasticsearch 1>$FOLDER/log.es.log 2>&1
+                        fi
                     ;;
 
                     daemon)
-                        #elasticsearch -d -p $STELLA_APP_WORK_ROOT/es.pid
-                        nohup -- elasticsearch 1>$STELLA_APP_WORK_ROOT/log.es.log 2>&1 &
+                        if [ "$FOLDER" == "" ]; then
+                            nohup -- elasticsearch 1>/dev/null 2>&1 &              
+                        else
+                            nohup -- elasticsearch 1>$FOLDER/log.es.log 2>&1 &
+                        fi
                         sleep 1
                         echo " ** elasticsearch started with PID $(ps aux | grep [o]rg.elasticsearch.bootstrap.Elasticsearch | tr -s " " | cut -d" " -f 2)"
                         #echo " ** elasticsearch started with PID $(cat $STELLA_APP_WORK_ROOT/es.pid)"
@@ -653,11 +657,19 @@ case $DOMAIN in
             run)
                 case $ID in 
                     single)
-                        kibana
+                        if [ "$FOLDER" == "" ]; then
+                            kibana
+                        else
+                            kibana 1>/dev/null 2>&1
+                        fi
                     ;;
 
                     daemon)
-                        nohup -- kibana 1>$STELLA_APP_WORK_ROOT/log.kibana.log 2>&1 &
+                        if [ "$FOLDER" == "" ]; then
+                            nohup -- kibana 1>/dev/null 2>&1 &
+                        else
+                            nohup -- kibana 1>$FOLDER/log.kibana.log 2>&1 &
+                        fi
                         echo " ** kibana started with PID $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2)"
                     ;;
                 esac
