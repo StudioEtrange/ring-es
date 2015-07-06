@@ -20,6 +20,7 @@ function usage() {
     echo " L     ring show ui : open some web applications"
     echo " L     ring home es : return es home path"
     echo " L     ring home kibana : return kibana home path"
+    echo " L     ring list version : list kibana and elasticsearch available version"
     echo " o-- ES management :"
     echo " L     es run <single|daemon> [--folder=<path>] : run elasticsearch -- folder path for log, if none logs are disabled"
     echo " L     es kill now : stop all elasticsearch instances"
@@ -62,7 +63,7 @@ function usage() {
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 DOMAIN=						'' 			a				'kibana plugin bck es ring'
-ACTION=                     ''            a             'shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
+ACTION=                     ''            a             'list shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
 ID=							''			s 				''
 "
 OPTIONS="
@@ -404,6 +405,14 @@ case $DOMAIN in
     # -----------------------------------------------------------------------------------
     ring)
         case $ACTION in
+            list)
+                echo "** elasticsearch available version"
+                $STELLA_API list_feature_version "elasticsearch"
+
+                echo "** kibana available version"
+                $STELLA_API list_feature_version "kibana"
+            ;;
+
             install)
                 case $ID in 
                     all)
@@ -463,8 +472,8 @@ case $DOMAIN in
             ;;
 
             purge)
-                $0 kibana purge all
-                $0 es purge all
+                $0 kibana delete all
+                $0 es delete all
             ;;
 
             home)
