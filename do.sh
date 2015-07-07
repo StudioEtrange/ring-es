@@ -473,7 +473,7 @@ case $DOMAIN in
 
             purge)
                 $0 kibana delete all
-                $0 es delete all
+                $0 es purge all
             ;;
 
             home)
@@ -522,7 +522,9 @@ case $DOMAIN in
             ;;
 
             purge)
-                echo $(ES_del)
+                # "*" means delete all index including hidden index (like .marvel or .kibana)
+                # "_all" means delete all regular index
+                echo $(ES_del "*")
             ;;
 
             create)
