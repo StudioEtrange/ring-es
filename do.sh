@@ -45,7 +45,7 @@ function usage() {
     echo " L     plugin install <org/user/component/version> [--uri=<uri>] : install plugin. If uri is used, --plugin must be a plugin <component> name"
     echo " L     plugin delete <component> : remove plugin. <component> is the plugin name"
     echo " L     plugin specific <marvel|hq|head|kopf|shield> : install a specific plugin"
-    echo " L     plugin marvel off : disable data collection for marvel"
+    echo " L     plugin marvel off : disable data collection for marvel (NOTE : you have to restart ES)"
     echo " L     plugin shield <add|del> --user --pass"
     echo " o-- KIBANA management :"
     echo " L     kibana run <single|daemon> [--folder=<path>] : run kibana -- folder path for log, if none logs are disabled"
