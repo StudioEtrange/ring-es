@@ -252,13 +252,15 @@ function ES_load_all_doc_by_type() {
     
     [ "$_path" == "" ] && _path=$SAVE_ROOT/json
 
-    cd $_path/$_index/$_type
+    if [ -d "$_path/$_index/$_type" ]; then
+        cd $_path/$_index/$_type
 
-    local _id=
-    for f in *; do
-        _id=$(echo $f | sed "s/.json//g")
-        [ -f "$f" ] && echo $(ES_put "$_index/$_type/$_id" "$_path/$_index/$_type/$f")
-    done
+        local _id=
+        for f in *; do
+            _id=$(echo $f | sed "s/.json//g")
+            [ -f "$f" ] && echo $(ES_put "$_index/$_type/$_id" "$_path/$_index/$_type/$f")
+        done
+    fi
 }
 
 # REPO_NAME,REPO_PATH ===> create snapshot repository
