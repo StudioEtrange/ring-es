@@ -4,7 +4,6 @@ _CURRENT_RUNNING_DIR="$( cd "$( dirname "." )" && pwd )"
 source $_CURRENT_FILE_DIR/stella-link.sh include
 
 
-
 # TODO
 # specific plugin shield : https://www.elastic.co/downloads/shield
 # add more specific plugin 
@@ -131,7 +130,7 @@ function _eval_file() {
     declare _file="$1"
     _file=$($STELLA_API rel_to_abs_path "$_file" "$STELLA_CURRENT_RUNNING_DIR")
 
-    declare data=$(< "$_file")
+    declare data=$(sed -E 's/\\\\+/\\\\\\/g' < "$_file") # replace two or more \ with three \ -- we need this to keep at least \\ in some vizualisations
     declare delimiter="__apply_shell_expansion_delimiter__"
     declare c="cat <<$delimiter"$'\n'"$data"$'\n'"$delimiter"
     eval "$c"
@@ -168,7 +167,7 @@ function ES_post() {
 
 function ES_del() {
     local _target=$1
-
+    
     local result=
     result=$(curl -s -XDELETE $ES_URL/$_target)
     echo $result
@@ -254,13 +253,15 @@ function ES_load_all_doc_by_type() {
     
     [ "$_path" == "" ] && _path=$SAVE_ROOT/json
 
-    cd $_path/$_index/$_type
+    if [ -d "$_path/$_index/$_type" ]; then
+        cd $_path/$_index/$_type
 
-    local _id=
-    for f in *; do
-        _id=$(echo $f | sed "s/.json//g")
-        [ -f "$f" ] && echo $(ES_put "$_index/$_type/$_id" "$_path/$_index/$_type/$f")
-    done
+        local _id=
+        for f in *; do
+            _id=$(echo $f | sed "s/.json//g")
+            [ -f "$f" ] && echo $(ES_put "$_index/$_type/$_id" "$_path/$_index/$_type/$f")
+        done
+    fi
 }
 
 # REPO_NAME,REPO_PATH ===> create snapshot repository
