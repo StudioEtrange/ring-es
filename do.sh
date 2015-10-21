@@ -22,7 +22,7 @@ function usage() {
     echo " L     ring home kibana : return kibana home path"
     echo " L     ring list version : list kibana and elasticsearch available version"
     echo " o-- ES management :"
-    echo " L     es run <single|daemon> [--folder=<path>] : run elasticsearch -- folder path for log, if none logs are disabled"
+    echo " L     es run <single|daemon> [--folder=<path>] [--heap] : run elasticsearch -- folder path for log, if none logs are disabled -- heap set ES_HEAP_SIZE"
     echo " L     es kill now : stop all elasticsearch instances"
     echo " L     es purge all : erase everything in es"
     echo " L     es create <index> : create an index"
@@ -81,6 +81,7 @@ ESVER='1_5_0'        ''         ''           s           0       ''             
 KVER='4_0_1'        ''         ''           s           0       ''              elasticsearch version
 USER=''        ''         ''           s           0       ''              username
 PASS=''        ''         ''           s           0       ''              password
+HEAP=''         ''          'es heap size'          s           0       ''  set elasticsearch heap size when launch (use ES_HEAP_SIZE)
 "
 
 $STELLA_API argparse "$0" "$OPTIONS" "$PARAMETERS" "Ring Elasticsearch" "$(usage)" "" "$@"
@@ -494,6 +495,8 @@ case $DOMAIN in
     es)
         case $ACTION in
             run)
+                # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
+                [ ! "$HEAP" == "" ] && export ES_HEAP_SIZE=$HEAP
                 case $ID in 
                     single)
                         if [ "$FOLDER" == "" ]; then
