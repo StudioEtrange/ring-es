@@ -21,7 +21,7 @@ function usage() {
     echo " L     ring home kibana : return kibana home path"
     echo " L     ring list version : list kibana and elasticsearch available version"
     echo " o-- ES management :"
-    echo " L     es run <single|daemon> [--folder=<path>] [--heap] : run elasticsearch -- folder path for log, if none logs are disabled -- heap set ES_HEAP_SIZE"
+    echo " L     es run <single|daemon> [--folder=<path>] [--heap=<size g>] : run elasticsearch -- folder path for log, if none logs are disabled -- heap set ES_HEAP_SIZE"
     echo " L     es kill now : stop all elasticsearch instances"
     echo " L     es purge all : erase everything in es"
     echo " L     es create <index> : create an index"
@@ -492,7 +492,7 @@ case $DOMAIN in
             
         esac
     ;;
-    # -----------------------------------------------------------------------------------
+    # ---------------------------   --------------------------------------------------------
     es)
         case $ACTION in
             run)
