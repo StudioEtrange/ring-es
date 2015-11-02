@@ -29,7 +29,7 @@ NOTE : At first launch, stella will be auto downloaded and installed. Or you can
 	L     ring home es : return es home path
 	L     ring home kibana : return es home path
 	o-- ES management :
-	L     es run <single|daemon> [--folder=<path>] : run elasticsearch -- folder path for log, if none log are disabled
+	L     es run <single|daemon> [--folder=<path>] [--heap=<size g>] : run elasticsearch -- folder path for log, if none log are disabled
 	L     es kill now : stop all elasticsearch instances
 	L     es purge all : erase everything in es
 	L     es create <index> : create an index
