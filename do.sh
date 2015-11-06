@@ -41,11 +41,14 @@ function usage() {
     echo " L     bck snapshot list : list all existing snapshot"
     echo " L     bck snapshot status : print status of all current process belonging to back management"
     echo " o-- ES plugin management :"
-    echo " L     plugin install <org/user/component/version> [--uri=<uri>] : install plugin. If uri is used, --plugin must be a plugin <component> name"
+    echo " L     plugin install <org/user/component/version> [--uri=<uri>] : install plugin. If uri is used, plugin must be a plugin <component> name"
     echo " L     plugin delete <component> : remove plugin. <component> is the plugin name"
     echo " L     plugin specific <marvel|hq|head|kopf|shield> : install a specific plugin"
     echo " L     plugin marvel off : disable data collection for marvel (NOTE : you have to restart ES)"
     echo " L     plugin shield <add|del> --user --pass"
+    echo " o-- KIBANA plugin management :"
+    echo " L     kplugin install <org/user/component/version> [--uri=<uri>] : install plugin. If uri is used, plugin must be a plugin <component> name"
+    echo " L     kplugin delete <component> : remove plugin. <component> is the plugin name"
     echo " o-- KIBANA management :"
     echo " L     kibana run <single|daemon> [--folder=<path>] : run kibana -- folder path for log, if none logs are disabled"
     echo " L     kibana kill now : stop all kibana instances"
@@ -61,7 +64,7 @@ function usage() {
 
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
-DOMAIN=						'' 			a				'kibana plugin bck es ring'
+DOMAIN=						'' 			a				'kibana plugin kplugin bck es ring'
 ACTION=                     ''            a             'list shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
 ID=							''			s 				''
 "
@@ -76,11 +79,11 @@ REPO=''                             'r'         'repository'                s   
 SNAP=''                             's'         'snapshot'                s           0       ''                      Snapshot id
 URI=''                             'u'         ''                s           0       ''                      URI (http:// or file://)
 FOLDER=''                             ''         'path'                s           0       ''                      Root folder
-ESVER='1_5_0'        ''         ''           s           0       ''              elasticsearch version
-KVER='4_0_1'        ''         ''           s           0       ''              elasticsearch version
-USER=''        ''         ''           s           0       ''              username
-PASS=''        ''         ''           s           0       ''              password
-HEAP=''         ''          'es heap size'          s           0       ''  set elasticsearch heap size when launch (use ES_HEAP_SIZE)
+ESVER='1_7_3'                       ''         ''           s           0       ''              elasticsearch version
+KVER='4_1_2'                        ''         ''           s           0       ''              elasticsearch version
+USER=''                             ''         ''           s           0       ''              username
+PASS=''                             ''         ''           s           0       ''              password
+HEAP=''                             ''          'es heap size'          s           0       ''  set elasticsearch heap size when launch (use ES_HEAP_SIZE)
 "
 
 $STELLA_API argparse "$0" "$OPTIONS" "$PARAMETERS" "Ring Elasticsearch" "$(usage)" "" "$@"
@@ -601,10 +604,10 @@ case $DOMAIN in
             install)
 
                 if [ "$URI" == "" ]; then
-                    # Note : --plugin must be an id (<org>/<user/component>/<version>)
+                    # Note : plugin must be an id (<org>/<user/component>/<version>)
                     $ES_HOME/bin/plugin $_proxy --install "$ID"
                 else
-                    # Note : --plugin must be a plugin name (component)
+                    # Note : plugin must be a plugin name (component)
                     $ES_HOME/bin/plugin $_proxy --install "$ID" --url "$URI"
                 fi
             ;;
@@ -664,6 +667,38 @@ case $DOMAIN in
                     ;;
                 esac
             ::
+        esac
+    ;;
+    # -----------------------------------------------------------------------------------
+    kplugin)
+ 
+        case $ACTION in  
+            install)
+
+                if [ "$URI" == "" ]; then
+                    # Note : plugin must be an id (<org>/<user/component>/<version>)
+                    $KIBANA_HOME/bin/plugin $_proxy --install "$ID"
+                else
+                    # Note : plugin must be a plugin name (component)
+                    $KIBANA_HOME/bin/plugin $_proxy --install "$ID" --url "$URI"
+                fi
+            ;;
+
+            delete)
+                $KIBANA_HOME/bin/plugin --remove "$ID"
+            ;;
+
+            specific)
+                case $ID in 
+                    timelion)
+                        timelion_url="https://github.com/rashidkpc/timelion/archive/master.zip"
+                        $ES_HOME/bin/plugin $_proxy --install timelion --url $timelion_url
+                        echo " ** GO TO ===> $ES_URL/_plugin/timelion"
+                    ;;
+
+                esac
+            ;;
+
         esac
     ;;
     # -----------------------------------------------------------------------------------
