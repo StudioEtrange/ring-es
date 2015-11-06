@@ -686,15 +686,16 @@ case $DOMAIN in
     # -----------------------------------------------------------------------------------
     kplugin)
         # WORK with KIBANA VER => 4.2
+        # NOTE for proxy, it use http_proxy env var
         case $ACTION in  
             install)
 
                 if [ "$URI" == "" ]; then
                     # Note : plugin must be an id (<org>/<user/component>/<version>)
-                    $KIBANA_HOME/bin/kibana $_proxy plugin --install "$ID"
+                    $KIBANA_HOME/bin/kibana plugin --install "$ID"
                 else
                     # Note : plugin must be a plugin name (component)
-                    $KIBANA_HOME/bin/kibana $_proxy plugin --install "$ID" --url="$URI"
+                    $KIBANA_HOME/bin/kibana plugin --install "$ID" --url="$URI"
                 fi
             ;;
 
@@ -706,7 +707,7 @@ case $DOMAIN in
                 case $ID in 
                     timelion)
                         timelion_url="https://github.com/rashidkpc/timelion/archive/master.zip"
-                        $ES_HOME/bin/kibana $_proxy plugin --install timelion --url=$timelion_url
+                        $ES_HOME/bin/kibana plugin --install timelion --url=$timelion_url
                         echo " ** GO TO ===> $ES_URL/_plugin/timelion"
                     ;;
 
