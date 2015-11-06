@@ -599,23 +599,37 @@ case $DOMAIN in
     ;;
     # -----------------------------------------------------------------------------------
     plugin)
- 
+        # VERS <2.x https://www.elastic.co/guide/en/elasticsearch/reference/1.6/modules-plugins.html
+        # VERS >=2.x https://www.elastic.co/guide/en/elasticsearch/plugins/2.0/installation.html
         case $ACTION in  
             install)
 
                 if [ "$URI" == "" ]; then
                     # Note : plugin must be an id (<org>/<user/component>/<version>)
-                    $ES_HOME/bin/plugin $_proxy --install "$ID"
+                    if [[ ${ESVER:0:1} == "2" ]]; then
+                        $ES_HOME/bin/plugin $_proxy install "$ID"
+                    else
+                        $ES_HOME/bin/plugin $_proxy --install "$ID"
+                    fi
                 else
                     # Note : plugin must be a plugin name (component)
-                    $ES_HOME/bin/plugin $_proxy --install "$ID" --url "$URI"
+                    if [[ ${ESVER:0:1} == "2" ]]; then
+                        $ES_HOME/bin/plugin $_proxy install "$ID" "$URI"
+                    else
+                        $ES_HOME/bin/plugin $_proxy --install "$ID" --url "$URI"
+                    fi
                 fi
             ;;
 
             delete)
-                $ES_HOME/bin/plugin --remove "$ID"
+                if [[ ${ESVER:0:1} == "2" ]]; then
+                    $ES_HOME/bin/plugin remove "$ID"
+                else
+                    $ES_HOME/bin/plugin --remove "$ID"
+                fi
             ;;
 
+            # TODO review install specific ES plugin for version => 2.x
             specific)
                 case $ID in 
                     kopf)
@@ -671,28 +685,28 @@ case $DOMAIN in
     ;;
     # -----------------------------------------------------------------------------------
     kplugin)
- 
+        # WORK with KIBANA VER => 4.2
         case $ACTION in  
             install)
 
                 if [ "$URI" == "" ]; then
                     # Note : plugin must be an id (<org>/<user/component>/<version>)
-                    $KIBANA_HOME/bin/plugin $_proxy --install "$ID"
+                    $KIBANA_HOME/bin/plugin $_proxy install "$ID"
                 else
                     # Note : plugin must be a plugin name (component)
-                    $KIBANA_HOME/bin/plugin $_proxy --install "$ID" --url "$URI"
+                    $KIBANA_HOME/bin/plugin $_proxy install "$ID" "$URI"
                 fi
             ;;
 
             delete)
-                $KIBANA_HOME/bin/plugin --remove "$ID"
+                $KIBANA_HOME/bin/plugin remove "$ID"
             ;;
 
             specific)
                 case $ID in 
                     timelion)
                         timelion_url="https://github.com/rashidkpc/timelion/archive/master.zip"
-                        $ES_HOME/bin/plugin $_proxy --install timelion --url $timelion_url
+                        $ES_HOME/bin/plugin $_proxy install timelion $timelion_url
                         echo " ** GO TO ===> $ES_URL/_plugin/timelion"
                     ;;
 
