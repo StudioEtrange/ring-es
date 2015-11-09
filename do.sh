@@ -728,7 +728,7 @@ case $DOMAIN in
             ;;
 
             delete)
-                $KIBANA_HOME/bin/kibana plugin remove "$ID"
+                $KIBANA_HOME/bin/kibana plugin --remove "$ID"
             ;;
 
             specific)
