@@ -28,6 +28,7 @@ function usage() {
     echo " L     es delete <index> : delete an index"
     echo " L     es open <index> : open an index"
     echo " L     es close <index> : close an index"
+    echo " L     es <map-save|map-register> <index> [--folder=<path>] : save|load mapping of an index"
     echo " o-- ES get request :"
     echo " L     es get id --index=<index> --doctype=<doctype> [--maxsize=<integer>] : print a list of id documents"
     echo " L     es get doc --index=<index> --doctype=<doctype> [--maxsize=<integer>] : print a list of documents"
@@ -65,7 +66,7 @@ function usage() {
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 DOMAIN=						'' 			a				'kibana plugin kplugin bck es ring'
-ACTION=                     ''            a             'list shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
+ACTION=                     ''            a             'map-register map-save list shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
 ID=							''			s 				''
 "
 OPTIONS="
@@ -221,7 +222,27 @@ function ES_get_id_list_by_type() {
     [ "$_maxsize" == "" ] && echo $(ES_get "$_index/$_type/_search" "$JSON_ROOT/es_search_fields.json") | jq -r '.hits.hits[]._id'
 }
 
+
 # ---------- ES SAVE/LOAD -----------------------------------------------------------------
+function ES_save_mapping() {
+    local _index=$1
+    local _path=$2
+    [ "$_path" == "" ] && _path=$SAVE_ROOT/json
+    
+    mkdir -p $_path/$_index
+
+     $(ES_get "$_index/_mapping" | jq -r ".$_index" > "$_path/$_index/_mapping.json")
+}
+
+function ES_register_mapping() {
+    local _index=$1
+    local _path=$2
+
+    [ "$_path" == "" ] && _path=$SAVE_ROOT/json
+
+    echo $(ES_put "$_index" "$_path/$_index/_mapping.json")
+}
+
 # INDEX/TYPE, PATH ===> save doc into files
 function ES_save_all_doc_by_type() {
     local _index=$1
@@ -498,6 +519,13 @@ case $DOMAIN in
     # ---------------------------   --------------------------------------------------------
     es)
         case $ACTION in
+            map-register)
+                ES_register_mapping $ID "$FOLDER"
+                ;;
+
+            map-save)
+                ES_save_mapping $ID "$FOLDER"
+                ;;
             run)
                 # https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html
                 [ ! "$HEAP" == "" ] && export ES_HEAP_SIZE=$HEAP
