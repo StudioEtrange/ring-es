@@ -783,8 +783,8 @@ case $DOMAIN in
                 esac
             ;;
             kill)
-                echo " ** kibana PID $(ps aux | grep [k]ibana | tr -s " " | cut -d" " -f 2) stopping"
-                kill $(ps aux | grep [k]ibana | tr -s " " | cut -d" " -f 2)
+                echo " ** kibana PID $(ps aux | grep $KIBANA_HOME | tr -s " " | cut -d" " -f 2) stopping"
+                kill $(ps aux | grep $KIBANA_HOME | tr -s " " | cut -d" " -f 2)
             ;;
             register)
                 case $ID in 
