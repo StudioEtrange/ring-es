@@ -60,7 +60,7 @@ function usage() {
     echo " L     kibana save <viz|dash|pattern|search> [--folder=<path>] : save all kibana visualization|dashboard|index-pattern|search [into a specific root folder]"
     echo " L     kibana delete all : erase all kibana objects"
     echo " L     kibana delete <viz|dash|pattern|search> : erase all kibana visualization|dashboard|index-pattern|search"
-    echo " L     kibana connect <ip> : connect kibana to a specific ES instance"
+    echo " L     kibana connect <http://ip:port> : connect kibana to a specific ES instance"
     
 
 }
@@ -760,7 +760,7 @@ case $DOMAIN in
             connect)
                 echo "** Kibana will be connected to ES on $ID"
                 sed -i.bak 's/.*elasticsearch.url.*//' $KIBANA_HOME/config/kibana.yml
-                echo "elasticsearch.url: \"$ES_URL\"" >> $KIBANA_HOME/config/kibana.yml
+                echo "elasticsearch.url: \"$ID\"" >> $KIBANA_HOME/config/kibana.yml
                 ;;
             run)
                 case $ID in 
