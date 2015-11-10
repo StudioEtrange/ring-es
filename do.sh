@@ -28,6 +28,7 @@ function usage() {
     echo " L     es delete <index> : delete an index"
     echo " L     es open <index> : open an index"
     echo " L     es close <index> : close an index"
+    echo " L     es listen <ip|interface> : set es listening interface or ip with network.host var. If it is an interface use this format : _eth0_"
     echo " L     es <map-save|map-register> <index> [--folder=<path>] : save|load mapping of an index"
     echo " o-- ES get request :"
     echo " L     es get id --index=<index> --doctype=<doctype> [--maxsize=<integer>] : print a list of id documents"
@@ -66,7 +67,7 @@ function usage() {
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 DOMAIN=						'' 			a				'kibana plugin kplugin bck es ring'
-ACTION=                     ''            a             'map-register map-save list shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
+ACTION=                     ''            a             'listen map-register map-save list shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
 ID=							''			s 				''
 "
 OPTIONS="
@@ -583,6 +584,12 @@ case $DOMAIN in
             ;;
             delete)
                 echo $(ES_del "$ID")
+            ;;
+
+            listen)
+                echo "** ES will listening on $ID on next start"
+                sed -i.bat 's/.*network.host.*//' $ES_HOME/config/elasticsearch.yml
+                echo "network.host: $ID" >> $ES_HOME/config/elasticsearch.yml
             ;;
 
             get)
