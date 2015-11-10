@@ -760,7 +760,7 @@ case $DOMAIN in
             connect)
                 echo "** Kibana will be connected to ES on $ID"
                 sed -i.bak 's/.*elasticsearch.url.*//' $KIBANA_HOME/config/kibana.yml
-                echo "elasticsearch.url: $ES_URL" >> $KIBANA_HOME/config/kibana.yml
+                echo "elasticsearch.url: \"$ES_URL\"" >> $KIBANA_HOME/config/kibana.yml
                 ;;
             run)
                 case $ID in 
@@ -783,8 +783,8 @@ case $DOMAIN in
                 esac
             ;;
             kill)
-                echo " ** kibana PID $(ps aux | grep $KIBANA_HOME | tr -s " " | cut -d" " -f 2) stopping"
-                kill $(ps aux | grep $KIBANA_HOME | tr -s " " | cut -d" " -f 2)
+                echo " ** kibana PID $(ps aux | grep $KIBANA_HOME | grep node | tr -s " " | cut -d" " -f 2) stopping"
+                kill $(ps aux | grep $KIBANA_HOME | grep node | tr -s " " | cut -d" " -f 2)
             ;;
             register)
                 case $ID in 
