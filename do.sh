@@ -588,7 +588,7 @@ case $DOMAIN in
 
             listen)
                 echo "** ES will listening on $ID on next start"
-                sed -i.bat 's/.*network.host.*//' $ES_HOME/config/elasticsearch.yml
+                sed -i.bak 's/.*network.host.*//' $ES_HOME/config/elasticsearch.yml
                 echo "network.host: $ID" >> $ES_HOME/config/elasticsearch.yml
             ;;
 
