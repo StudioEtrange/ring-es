@@ -60,14 +60,15 @@ function usage() {
     echo " L     kibana save <viz|dash|pattern|search> [--folder=<path>] : save all kibana visualization|dashboard|index-pattern|search [into a specific root folder]"
     echo " L     kibana delete all : erase all kibana objects"
     echo " L     kibana delete <viz|dash|pattern|search> : erase all kibana visualization|dashboard|index-pattern|search"
-
+    echo " L     kibana connect <ip> : connect kibana to a specific ES instance"
+    
 
 }
 
 # COMMAND LINE -----------------------------------------------------------------------------------
 PARAMETERS="
 DOMAIN=						'' 			a				'kibana plugin kplugin bck es ring'
-ACTION=                     ''            a             'listen map-register map-save list shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
+ACTION=                     ''            a             'connect listen map-register map-save list shield home kill delete save register purge run install delete specific marvel snapshot restore save get put post close open create show uninstall'
 ID=							''			s 				''
 "
 OPTIONS="
@@ -590,6 +591,8 @@ case $DOMAIN in
                 echo "** ES will listening on $ID on next start"
                 sed -i.bak 's/.*network.host.*//' $ES_HOME/config/elasticsearch.yml
                 echo "network.host: $ID" >> $ES_HOME/config/elasticsearch.yml
+
+                echo "** If you use Kibana, dont forget to connect it to this IP"
             ;;
 
             get)
@@ -754,6 +757,11 @@ case $DOMAIN in
     # -----------------------------------------------------------------------------------
     kibana)
         case $ACTION in
+            connect)
+                echo "** Kibana will be connected to ES on $ID"
+                sed -i.bak 's/.*elasticsearch.url.*//' $KIBANA_HOME/config/kibana.yml
+                echo "elasticsearch.url: $ES_URL" >> $KIBANA_HOME/config/kibana.yml
+                ;;
             run)
                 case $ID in 
                     single)
@@ -770,13 +778,13 @@ case $DOMAIN in
                         else
                             nohup -- kibana 1>$FOLDER/log.kibana.log 2>&1 &
                         fi
-                        echo " ** kibana started with PID $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2)"
+                        echo " ** kibana started with PID $(ps aux | grep [k]ibana | tr -s " " | cut -d" " -f 2)"
                     ;;
                 esac
             ;;
             kill)
-                echo " ** kibana PID $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2) stopping"
-                kill $(ps aux | grep [k]ibana.js | tr -s " " | cut -d" " -f 2)
+                echo " ** kibana PID $(ps aux | grep [k]ibana | tr -s " " | cut -d" " -f 2) stopping"
+                kill $(ps aux | grep [k]ibana | tr -s " " | cut -d" " -f 2)
             ;;
             register)
                 case $ID in 
