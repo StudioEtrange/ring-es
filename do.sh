@@ -778,7 +778,7 @@ case $DOMAIN in
                         else
                             nohup -- kibana 1>$FOLDER/log.kibana.log 2>&1 &
                         fi
-                        echo " ** kibana started with PID $(ps aux | grep [k]ibana | tr -s " " | cut -d" " -f 2)"
+                        echo " ** kibana started with PID $(ps aux | grep $KIBANA_HOME | grep node | tr -s " " | cut -d" " -f 2)"
                     ;;
                 esac
             ;;
