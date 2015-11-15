@@ -744,7 +744,7 @@ case $DOMAIN in
             specific)
                 case $ID in 
                     timelion)
-                        timelion_url="https://github.com/rashidkpc/timelion/archive/master.zip"
+                        timelion_url="https://github.com/elastic/timelion/archive/master.zip"
                         $KIBANA_HOME/bin/kibana plugin --install timelion --url=$timelion_url
                         echo " ** GO TO ===> $ES_URL/_plugin/timelion"
                     ;;
