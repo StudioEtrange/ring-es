@@ -1,3 +1,5 @@
+# DEPRECATED : see es-manage : https://github.com/StudioEtrange/es-manage
+
 # ring-es
 Simple bash elasticsearch management
 
